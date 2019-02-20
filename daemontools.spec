@@ -53,19 +53,6 @@ cp -p ${RPM_SOURCE_DIR}/daemontools.conf ${RPM_BUILD_ROOT}/etc/init
 rm -rf ${RPM_BUILD_ROOT}
 
 
-%post
-[ -d /service ] || mkdir /service
-initctl reload-configuration
-
-
-%preun
-initctl stop daemontools > /dev/null 2>&1 ||:
-
-
-%postun
-initctl reload-configuration
-
-rmdir /service 2> /dev/null ||:
 
 
 %files
