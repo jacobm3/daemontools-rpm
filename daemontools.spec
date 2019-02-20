@@ -44,15 +44,9 @@ rm -rf ${RPM_BUILD_ROOT}
 mkdir -p ${RPM_BUILD_ROOT}/usr/bin
 cp -p command/* ${RPM_BUILD_ROOT}/usr/bin
 cp -fp ${RPM_SOURCE_DIR}/svscanboot ${RPM_BUILD_ROOT}/usr/bin
-
-%if 0%{?rhel} >= 7 || 0%{?fedora} >= 23
-mkdir -p ${RPM_BUILD_ROOT}/usr/lib/systemd/system
-cp -p ${RPM_SOURCE_DIR}/daemontools.service ${RPM_BUILD_ROOT}/usr/lib/systemd/system
-%endif
-%if 0%{?el6}
 mkdir -p ${RPM_BUILD_ROOT}/etc/init
 cp -p ${RPM_SOURCE_DIR}/daemontools.conf ${RPM_BUILD_ROOT}/etc/init
-%endif
+
 
 
 %clean
@@ -61,36 +55,15 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %post
 [ -d /service ] || mkdir /service
-
-%if 0%{?el6}
 initctl reload-configuration
-%endif
-%if 0%{?el5} || 0%{?el4}
-echo 'SV:123456:respawn:/usr/bin/svscanboot' >> /etc/inittab
-%endif
 
 
 %preun
-%if 0%{?rhel} >= 7 || 0%{?fedora} >= 23
-systemctl stop daemontools.service
-systemctl disable daemontools.service 2> /dev/null
-%endif
-%if 0%{?el6}
 initctl stop daemontools > /dev/null 2>&1 ||:
-%endif
-%if 0%{?el5} || 0%{?el4}
-pkill svscan ||:
-pkill svscanboot ||:
-%endif
 
 
 %postun
-%if 0%{?el6}
 initctl reload-configuration
-%endif
-%if 0%{?el5} || 0%{?el4}
-sed -i '/svscanboot/d' /etc/inittab
-%endif
 
 rmdir /service 2> /dev/null ||:
 
@@ -113,15 +86,15 @@ rmdir /service 2> /dev/null ||:
 %attr(0755,root,root) /usr/bin/svstat
 %attr(0755,root,root) /usr/bin/tai64n
 %attr(0755,root,root) /usr/bin/tai64nlocal
-%if 0%{?rhel} >= 7 || 0%{?fedora} >= 23
-%attr(0644,root,root) /usr/lib/systemd/system/daemontools.service
-%endif
-%if 0%{?el6}
+
+
 %attr(0644,root,root) /etc/init/daemontools.conf
-%endif
+
 
 
 %changelog
+* Tue Feb 19 2019 jacobm3 <jacobm3@gmail.com> 
+- Simplified startup to attempt successful install in centos7 docker image
 * Sun Jul 20 2014 teru <teru@kteru.net>
 - Added startup script for el7
 * Fri Sep 16 2011 teru <teru@kteru.net>
